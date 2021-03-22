@@ -19,12 +19,27 @@ window.onload = () => {
 			div.id = 'box' + boxIndex;
 
 			let html = '<div class="box-hd">\
-										标题\
-										<i class="icon-close"></i>\
-									</div>\
-									<div class="box-content">\
-										<!-- <div class="content-1"></div> -->\
-									</div>'
+							标题\
+							<i class="icon-close"></i>\
+						</div>\
+						<div class="box-wrap">\
+							<div class="box-content">\
+								<div class="content-1">111</div>\
+								<div class="content-1">222</div>\
+								<div class="content-1">333</div>\
+								<div class="content-1">444</div>\
+								<div class="content-1">555</div>\
+								<div class="content-1">666</div>\
+								<div class="content-1">777</div>\
+								<div class="content-1">888</div>\
+								<div class="content-1">999</div>\
+								<div class="content-1">101010</div>\
+								<div class="content-1">111111</div>\
+								<div class="content-1">121212</div>\
+								<div class="content-1">131313</div>\
+								<div class="content-1">141414</div>\
+							</div>\
+						</div>'
 			div.innerHTML = html;
 
 			parent.appendChild(div);

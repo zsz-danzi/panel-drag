@@ -14,7 +14,6 @@ function PlaneDrag(opt) {
 	this.life = true;
 	this.opt = opt;
 	
-
 	this.W = document.documentElement.clientWidth;
 	this.H = document.documentElement.clientHeight;
 
@@ -24,14 +23,11 @@ function PlaneDrag(opt) {
 	this.top = opt.top || 100 ;
 	this.left = opt.left || this.W / 2 - this.width/2 ;
 
-
 	this.dom.style.cssText = 'width: '+this.width+'px; height: '+this.height+'px; transform: translate('+this.left+'px, '+this.top+'px); z-index:' + this.index;
-
 
 	this.moveFlag = false;
 	this.minW = 150; // 最小宽度100
 	this.minH = 200; // 最小高度200
-
 
 	// 拉大缩小属性
 	this.edge = 4; // 左右上下距离边3的时候显示拉大缩小
@@ -48,6 +44,9 @@ function PlaneDrag(opt) {
 
 	this.doubleClickFlag = false;
 
+	// this.showTipFlag = opt.showTipFlag || true;
+	this.tipW = 84;
+	this.tipH = 24;
 	return this;
 }
 
@@ -83,9 +82,10 @@ PlaneDrag.prototype.init = function() {
 
 	// 处理尺寸大小
 	self.dom.addEventListener('mousedown', (ev) => {
-		// console.log(1111)
 		if (this.status == 'null') return;
 		this.moveFlag = true;
+		this.showTipFlag = true;
+		this.ev = ev;
 		this.render2();
 		self.start(ev);
 		document.documentElement.addEventListener('mousemove', self.sizeFn, false);
@@ -123,6 +123,7 @@ PlaneDrag.prototype.reset = function() {
 
 PlaneDrag.prototype.size = function(ev) {
 	// console.log('move2')
+	this.ev = ev;
 	this.disX = ev.screenX - this.startX;
 	this.disY = ev.screenY - this.startY;
 
@@ -155,6 +156,7 @@ PlaneDrag.prototype.size = function(ev) {
 PlaneDrag.prototype.sizeEnd = function(ev) {
 	let self = this;
 	this.moveFlag = false;
+	this.showTipFlag = false;
 	document.documentElement.removeEventListener('mousemove', self.sizeFn, false);
 	document.documentElement.removeEventListener('mouseup', self.sizeEndFn, false);
 }
@@ -198,7 +200,6 @@ PlaneDrag.prototype.fullWindow = function(ev) {
 		this.top = 0;
 		this.left = 0;
 		this.dom.style.cssText = '-webkit-transition:all ease .3s 0s; width: '+this.width+'px; height: '+this.height+'px; transform: translate('+this.left+'px, '+this.top+'px); z-index:' + this.index;
-		// console.log(999)
 	} else {
 		this.width = this.prevW;
 		this.height = this.prevH;
@@ -271,6 +272,183 @@ PlaneDrag.prototype.winMove = function(ev) {
 // 设置弹窗层级
 PlaneDrag.prototype.setZindex = function(index) {
 	this.index = index;
+}
+
+// 设置showTips
+PlaneDrag.prototype.showTips = function(width, height, left, top) {
+	if (this.showTipFlag) {
+		if (!window.dragTip) {
+			let div = document.createElement('div');
+			div.className = 'panel-drag-tips'
+			window.dragTip = div;
+			div.innerHTML = '<span>0 * 0</span>';
+			document.body.appendChild(div);
+		} 
+
+		let x = this.ev.clientX;
+		let y = this.ev.clientY;
+
+
+		if (this.status.indexOf('righttop') > -1) {
+			x = x + 10;
+			y = y - this.tipH - 8 ;
+
+			if (x > this.W - this.tipW) {
+				x = left + width - this.tipW - 10;
+			} else if ( x < left + this.minW + 10  ){
+				x = left + this.minW + 10
+			}
+
+			if (y < this.menuH + 2) {
+				y = top + this.menuH + 10;
+			} else if (y > top + this.menuH - this.tipH - 10) {
+				y = top + this.menuH - this.tipH - 10;
+			}
+
+			window.dragTip.innerHTML = '<span>'+this.dom.offsetWidth+' * '+this.dom.offsetHeight+'</span>';
+			window.dragTip.style.cssText = 'left: '+ x +'px; top: '+y+'px';
+			return false;
+		}
+
+		if (this.status.indexOf('rightbottom') > -1) {
+			x = x + 10;
+			y = y + 10;
+
+			if (x > this.W - this.tipW) {
+				x = left + width - this.tipW - 10;
+			} else if ( x < left + this.minW + 10  ){
+				x = left + this.minW + 10
+			}
+
+			if (y > this.H - this.tipH) {
+				y = top + height + this.menuH - this.tipH - 10;
+			} else if ( y < top + this.minH + this.menuH + 6  ){
+				y = top + this.minH + this.menuH + 6;
+			}
+
+			window.dragTip.innerHTML = '<span>'+this.dom.offsetWidth+' * '+this.dom.offsetHeight+'</span>';
+			window.dragTip.style.cssText = 'left: '+ x +'px; top: '+y+'px';
+			return false;
+		}
+
+		if (this.status.indexOf('lefttop') > -1) {
+			x = x - this.tipW -  10;
+			y = y - this.tipH - 8 ;
+
+			if (x < 0) {
+				x = left + 10;
+			} else if (x > left - 10 - this.tipW){
+				x = left - 10 - this.tipW;
+			}
+
+			if (y < this.menuH + 2) {
+				y = top + this.menuH + 10;
+			} else if (y > top + this.menuH - this.tipH - 10) {
+				y = top + this.menuH - this.tipH - 10;
+			}
+
+			window.dragTip.innerHTML = '<span>'+this.dom.offsetWidth+' * '+this.dom.offsetHeight+'</span>';
+			window.dragTip.style.cssText = 'left: '+ x +'px; top: '+y+'px';
+			return false;
+		}
+
+		if (this.status.indexOf('leftbottom') > -1) {
+			x = x - this.tipW -  10;
+			y = y + 10;
+
+			if (x < 0) {
+				x = left + 10;
+			} else if (x > left - 10 - this.tipW){
+				x = left - 10 - this.tipW;
+			}
+			
+			if (y > this.H - this.tipH) {
+				y = top + height + this.menuH - this.tipH - 10;
+			} else if ( y < top + this.minH + this.menuH + 6  ){
+				y = top + this.minH + this.menuH + 6;
+			}
+
+			window.dragTip.innerHTML = '<span>'+this.dom.offsetWidth+' * '+this.dom.offsetHeight+'</span>';
+			window.dragTip.style.cssText = 'left: '+ x +'px; top: '+y+'px';
+			return false;
+		}
+
+		if (this.status.indexOf('right') > -1) {
+			x = x + 10;
+
+			if (x > this.W - this.tipW) {
+				x = left + width - this.tipW - 10;
+			} else if ( x < left + this.minW + 10  ){
+				x = left + this.minW + 10
+			}
+
+			if ( y < top + this.menuH ) {
+				y = top + this.menuH ;
+			} else if (y > top + height + this.menuH) {
+				y = top + height + this.menuH;
+			}
+
+			y = y - this.tipH/2;
+		}
+	
+		if (this.status.indexOf('left') > -1) {
+			x = x - this.tipW - 10;
+
+			if (x < 0) {
+				x = left + 10;
+			} else if (x > left - 10 - this.tipW){
+				x = left - 10 - this.tipW;
+			}
+
+			if ( y < top + this.menuH ) {
+				y = top + this.menuH ;
+			} else if (y > top + height + this.menuH) {
+				y = top + height + this.menuH;
+			}
+
+			y = y - this.tipH/2;
+		}
+	
+		if (this.status.indexOf('top') > -1) {
+			y = y - this.tipH - 10;
+
+			if (y < this.menuH) {
+				y = top + this.menuH + 10;
+			} else if (y > top + this.menuH - this.tipH - 10) {
+				y = top + this.menuH - this.tipH - 10;
+			}
+
+			if ( x < left ) {
+				x = left;
+			} else if (x > left + width) {
+				x = left + width
+			}
+
+			x = x - this.tipW/2;
+		}
+		
+		if (this.status.indexOf('bottom') > -1){
+			y = y + 10;
+			if (y > this.H - this.tipH) {
+				y = top + height + this.menuH - this.tipH - 10;
+			} else if ( y < top + this.minH + this.menuH + 6  ){
+				y = top + this.minH + this.menuH + 6;
+			}
+
+			if ( x < left ) {
+				x = left;
+			} else if (x > left + width) {
+				x = left + width
+			}
+			x = x - this.tipW/2;
+		}
+
+		window.dragTip.innerHTML = '<span>'+this.dom.offsetWidth+' * '+this.dom.offsetHeight+'</span>';
+		window.dragTip.style.cssText = 'left: '+ x +'px; top: '+y+'px';
+	} else if (window.dragTip){
+		document.body.removeChild(window.dragTip);
+		window.dragTip = null;
+	}
 }
 
 // 渲染
@@ -374,5 +552,7 @@ PlaneDrag.prototype.moveBound2 = function() {
 		this.height = height;
 	}
 
+	// 渲染tips
+	this.showTips(width, height, left, top);
 	this.dom.style.cssText = 'width: '+width+'px; height: '+height+'px; transform: translate('+left+'px, '+top+'px); z-index:' + this.index;
 }
