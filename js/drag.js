@@ -58,14 +58,11 @@ PlaneDrag.prototype.init = function() {
 	self.endFn = self.end.bind(self);
 	
 	self.head.addEventListener('mousedown', (ev) => {
-		// ev.stopPropagation();
 		if (this.status != 'null') return;
 		this.nowTime = new Date().getTime();
 
 		if (this.nowTime - this.prevTime < 300) {
-			//
 			this.fullWindow();
-			
 			return;	
 		}
 
